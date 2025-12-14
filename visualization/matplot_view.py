@@ -1,5 +1,10 @@
 import matplotlib.pyplot as plt
 import matplotlib.animation as animation
+import numpy as np
+
+FPS = 30
+CELL_LENGTH_M = 0.30
+ROBOT_SPEED_MPS = 1.0
 
 def animate_exploration(maze, explorer, start, goal):
     fig, ax = plt.subplots()
@@ -118,4 +123,44 @@ def animate_maze(maze, path, visited, start, goal):
         repeat=False
     )
 
+    plt.show()
+
+
+def animate_drive(maze, path, start, goal):
+    fig, ax = plt.subplots()
+    ax.set_aspect("equal")
+
+    for r in range(maze.height):
+        for c in range(maze.width):
+            if maze.is_wall(r, c):
+                ax.add_patch(plt.Rectangle((c, maze.height-r-1), 1, 1, color="black"))
+            else:
+                ax.add_patch(plt.Rectangle((c, maze.height-r-1), 1, 1,
+                                           edgecolor="gray", fill=False))
+
+    robot, = ax.plot([], [], "ro", markersize=8)
+
+    def center(cell):
+        return cell.col + 0.5, maze.height - cell.row - 0.5
+
+    positions = []
+
+    for i in range(len(path) - 1):
+        x1, y1 = center(path[i])
+        x2, y2 = center(path[i+1])
+        frames = int((CELL_LENGTH_M / ROBOT_SPEED_MPS) * FPS)
+        for t in np.linspace(0, 1, frames):
+            positions.append((x1 + t*(x2-x1), y1 + t*(y2-y1)))
+
+    def update(i):
+        robot.set_data(*positions[i])
+        return robot,
+
+    ax.set_xlim(0, maze.width)
+    ax.set_ylim(0, maze.height)
+    ax.set_xticks([])
+    ax.set_yticks([])
+
+    animation.FuncAnimation(fig, update, frames=len(positions),
+                            interval=1000/FPS, repeat=False)
     plt.show()

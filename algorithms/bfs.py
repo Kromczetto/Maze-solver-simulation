@@ -1,15 +1,13 @@
 from collections import deque
 from maze.cell import Cell
 
-def bfs(maze, start: Cell, goal: Cell):
+def bfs_explore(maze, start: Cell, goal: Cell):
     queue = deque([start])
-    visited = set([start])
+    visited = {start}
     parent = {start: None}
 
     while queue:
         current = queue.popleft()
-
-        # KLUCZOWE: oddajemy krok BFS do animacji
         yield current, visited.copy()
 
         if current == goal:
@@ -21,11 +19,10 @@ def bfs(maze, start: Cell, goal: Cell):
                 parent[neighbor] = current
                 queue.append(neighbor)
 
-    # rekonstrukcja ścieżki
     path = []
     if goal in parent:
         cur = goal
-        while cur is not None:
+        while cur:
             path.append(cur)
             cur = parent[cur]
         path.reverse()

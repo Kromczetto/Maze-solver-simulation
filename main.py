@@ -1,31 +1,29 @@
 from maze.maze import Maze
 from maze.cell import Cell
-from algorithms.bfs import bfs
+from algorithms.bfs import bfs_explore
 from algorithms.dfs import dfs_explore
-from visualization.matplot_view import animate_maze, animate_exploration
+from algorithms.astar import astar_explore
+from visualization.matplot_view import animate_exploration, animate_drive
+from simulation.time_model import estimate_travel_time
 from config import SimulationConfig
+
 
 def show_menu() -> SimulationConfig:
     print("=== MAZE SOLVER SIMULATION ===")
     print("Wybierz algorytm:")
     print("1 - BFS")
     print("2 - DFS")
+    print("3 - A*")
 
     while True:
-        choice = input("Twój wybór [1/2]: ").strip()
-        if choice in ("1", "2"):
+        choice = input("Twój wybór [1/3]: ").strip()
+        if choice in ("1", "2", "3"):
             break
         print("Niepoprawny wybór.")
 
-    print("\nPodaj grubość ścian (mm) – parametr eksperymentalny")
-    while True:
-        try:
-            wall_thickness = float(input("Grubość ścian [np. 5]: "))
-            break
-        except ValueError:
-            print("Podaj liczbę.")
+    wall_thickness = float(input("Grubość ścian [mm]: "))
 
-    algorithm = "bfs" if choice == "1" else "dfs"
+    algorithm = {"1": "bfs", "2": "dfs", "3": "astar"}[choice]
 
     return SimulationConfig(
         algorithm=algorithm,
@@ -33,18 +31,29 @@ def show_menu() -> SimulationConfig:
     )
 
 
+def run_explorer(explorer):
+    """Obsługuje generator eksploracyjny i wyciąga path"""
+    steps = []
+    path = []
+
+    try:
+        while True:
+            steps.append(next(explorer))
+    except StopIteration as e:
+        path = e.value
+
+    return steps, path
+
+
 def main():
     config = show_menu()
-
-    print(f"\nWybrany algorytm: {config.algorithm.upper()}")
-    print(f"Grubość ścian: {config.wall_thickness} mm\n")
 
     grid = [
         [0,0,0,1,0,0,0],
         [1,1,0,1,0,1,0],
         [0,0,0,0,0,1,0],
-        [0,1,1,1,0,1,0],
-        [0,1,0,0,0,0,0],
+        [0,1,0,1,0,1,0],
+        [0,0,0,0,0,1,0],
     ]
 
     maze = Maze(grid)
@@ -52,13 +61,23 @@ def main():
     goal = Cell(4, 6)
 
     if config.algorithm == "bfs":
-        explorer = bfs(maze, start, goal)
-        animate_exploration(maze, explorer, start, goal)
-
+        steps, _ = run_explorer(bfs_explore(maze, start, goal))
+        animate_exploration(maze, steps, start, goal)
 
     elif config.algorithm == "dfs":
-        explorer = dfs_explore(maze, start, goal)
-        animate_exploration(maze, explorer, start, goal)
+        steps, _ = run_explorer(dfs_explore(maze, start, goal))
+        animate_exploration(maze, steps, start, goal)
+
+    elif config.algorithm == "astar":
+        steps, path = run_explorer(astar_explore(maze, start, goal))
+
+        # 1. myślenie robota
+        animate_exploration(maze, steps, start, goal)
+
+        # 2. fizyczna jazda
+        # animate_drive(maze, path, start, goal)
+
+        print(f"Szacowany czas przejazdu: {estimate_travel_time(path):.2f} s")
 
 
 if __name__ == "__main__":

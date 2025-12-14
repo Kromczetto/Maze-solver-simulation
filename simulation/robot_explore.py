@@ -1,12 +1,21 @@
 from maze.cell import Cell
 
-def dfs_explore(maze, start: Cell, goal: Cell):
+def robot_explore(maze, start: Cell, goal: Cell):
+    """
+    Realistyczna eksploracja robota:
+    - ruch tylko do sąsiadów
+    - cofanie się z zaułków
+    - brak teleportacji
+    """
+
     stack = [start]
-    visited = set([start])
+    visited = {start}
 
     while stack:
         current = stack[-1]
-        yield current, visited  
+
+        # krok robota
+        yield current, visited.copy()
 
         if current == goal:
             return
@@ -20,4 +29,5 @@ def dfs_explore(maze, start: Cell, goal: Cell):
                 break
 
         if not moved:
-            stack.pop()  
+            # fizyczne cofnięcie
+            stack.pop()

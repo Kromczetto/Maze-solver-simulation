@@ -9,6 +9,9 @@ def bfs(maze, start: Cell, goal: Cell):
     while queue:
         current = queue.popleft()
 
+        # KLUCZOWE: oddajemy krok BFS do animacji
+        yield current, visited.copy()
+
         if current == goal:
             break
 
@@ -18,6 +21,7 @@ def bfs(maze, start: Cell, goal: Cell):
                 parent[neighbor] = current
                 queue.append(neighbor)
 
+    # rekonstrukcja ścieżki
     path = []
     if goal in parent:
         cur = goal
@@ -26,4 +30,4 @@ def bfs(maze, start: Cell, goal: Cell):
             cur = parent[cur]
         path.reverse()
 
-    return path, visited
+    return path

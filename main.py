@@ -8,8 +8,8 @@ from config import SimulationConfig
 def show_menu() -> SimulationConfig:
     print("=== MAZE SOLVER SIMULATION ===")
     print("Wybierz algorytm:")
-    print("1 - BFS (planowanie, bez cofania)")
-    print("2 - DFS (eksploracja z cofaniem)")
+    print("1 - BFS")
+    print("2 - DFS")
 
     while True:
         choice = input("Twój wybór [1/2]: ").strip()
@@ -52,8 +52,9 @@ def main():
     goal = Cell(4, 6)
 
     if config.algorithm == "bfs":
-        path, visited = bfs(maze, start, goal)
-        animate_maze(maze, path, visited, start, goal)
+        explorer = bfs(maze, start, goal)
+        animate_exploration(maze, explorer, start, goal)
+
 
     elif config.algorithm == "dfs":
         explorer = dfs_explore(maze, start, goal)

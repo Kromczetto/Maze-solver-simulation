@@ -7,7 +7,6 @@ def animate_exploration(maze, steps, start, goal):
     fig, ax = plt.subplots()
     ax.set_aspect("equal")
 
-    # ===== SIATKA LABIRYNTU =====
     for r in range(maze.height):
         for c in range(maze.width):
             ax.add_patch(
@@ -19,7 +18,6 @@ def animate_exploration(maze, steps, start, goal):
                 )
             )
 
-    # ===== START / GOAL =====
     ax.text(
         start.col + 0.5,
         maze.height - start.row - 0.5,
@@ -49,7 +47,6 @@ def animate_exploration(maze, steps, start, goal):
         nonlocal robot_patch
         cell, visited, robot_map = steps[i]
 
-        # ===== PAMIĘĆ ROBOTA =====
         for r in range(robot_map.height):
             for c in range(robot_map.width):
                 state = robot_map.map[r][c]
@@ -76,7 +73,6 @@ def animate_exploration(maze, steps, start, goal):
                 ax.add_patch(rect)
                 memory_patches[key] = rect
 
-        # ===== POZYCJA ROBOTA =====
         if robot_patch:
             robot_patch.remove()
 
@@ -95,7 +91,6 @@ def animate_exploration(maze, steps, start, goal):
     ax.set_xticks([])
     ax.set_yticks([])
 
-    # ✅ KLUCZOWE: MUSI BYĆ REFERENCJA
     anim = animation.FuncAnimation(
         fig,
         update,

@@ -1,23 +1,23 @@
 import heapq
 
-def heuristic(a, b):
-    return abs(a.row - b.row) + abs(a.col - b.col)
-
-def astar_on_memory(robot_map, start, goal):
+def dijkstra(robot_map, start, goal):
     robot_map.set_free(start)
     robot_map.set_free(goal)
 
-    open_set = []
-    heapq.heappush(open_set, (0, start))
+    pq = []
+    heapq.heappush(pq, (0, start))
 
+    dist = {start: 0}
     came_from = {start: None}
-    g = {start: 0}
 
-    while open_set:
-        _, current = heapq.heappop(open_set)
+    while pq:
+        current_dist, current = heapq.heappop(pq)
 
         if current == goal:
             break
+
+        if current_dist > dist[current]:
+            continue
 
         for dr, dc in [(-1,0),(1,0),(0,-1),(0,1)]:
             r, c = current.row + dr, current.col + dc
@@ -26,12 +26,11 @@ def astar_on_memory(robot_map, start, goal):
                 if not robot_map.is_free(neighbor):
                     continue
 
-                tentative = g[current] + 1
-                if neighbor not in g or tentative < g[neighbor]:
-                    g[neighbor] = tentative
-                    f = tentative + heuristic(neighbor, goal)
-                    heapq.heappush(open_set, (f, neighbor))
+                new_dist = current_dist + 1
+                if neighbor not in dist or new_dist < dist[neighbor]:
+                    dist[neighbor] = new_dist
                     came_from[neighbor] = current
+                    heapq.heappush(pq, (new_dist, neighbor))
 
     path = []
     cur = goal

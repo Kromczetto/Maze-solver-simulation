@@ -1,12 +1,6 @@
 from maze.cell import Cell
 
 def robot_explore(maze, start: Cell, goal: Cell):
-    """
-    Realistyczna eksploracja robota:
-    - ruch tylko do sąsiadów
-    - cofanie się z zaułków
-    - brak teleportacji
-    """
 
     stack = [start]
     visited = {start}
@@ -14,7 +8,6 @@ def robot_explore(maze, start: Cell, goal: Cell):
     while stack:
         current = stack[-1]
 
-        # krok robota
         yield current, visited.copy()
 
         if current == goal:
@@ -29,5 +22,4 @@ def robot_explore(maze, start: Cell, goal: Cell):
                 break
 
         if not moved:
-            # fizyczne cofnięcie
             stack.pop()

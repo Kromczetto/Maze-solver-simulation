@@ -15,7 +15,7 @@ def micromouse_explore(real_maze, start, goal):
         yield current, visited.copy(), robot_map
 
         if current == goal:
-            return robot_map
+            return robot_map   # <-- WAŻNE
 
         sensed = sense(real_maze, current)
         moved = False
@@ -31,4 +31,4 @@ def micromouse_explore(real_maze, start, goal):
                     break
 
         if not moved:
-            stack.pop() 
+            stack.pop()

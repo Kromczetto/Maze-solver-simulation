@@ -14,7 +14,7 @@ class Maze:
         return self.grid[row][col] == 1
 
     def get_neighbors(self, cell: Cell):
-        directions = [(-1, 0), (1, 0), (0, -1), (0, 1)]
+        directions = [(-1, 0), (1, 0), (0, -1), (0, 1)]   
         for dr, dc in directions:
             nr = cell.row + dr
             nc = cell.col + dc

@@ -13,6 +13,7 @@ def run(explorer):
     return steps
 
 def main():
+    
     grid = [
         [0,0,0,1,0,0,0,0,1,0],
         [1,1,0,1,0,1,1,0,1,0],

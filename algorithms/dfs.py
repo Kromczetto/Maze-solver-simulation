@@ -1,27 +1,37 @@
-from maze.cell import Cell
 from maze.robot_map import RobotMap
 
 def dfs(maze, start, goal):
     robot_map = RobotMap(maze.height, maze.width)
-    stack = [start]
     visited = set()
+    path = [start]
 
     robot_map.set_free(start)
+    visited.add(start)
 
-    while stack:
-        current = stack.pop()
+    yield start, visited.copy(), robot_map
 
-        if current in visited:
-            continue
-
-        visited.add(current)
-        robot_map.set_free(current)
-
-        yield current, visited.copy(), robot_map
+    while path:
+        current = path[-1]
 
         if current == goal:
             return
-        
+
+        # znajdź nieodwiedzonego sąsiada
+        next_cell = None
         for neighbor in maze.get_neighbors(current):
             if neighbor not in visited:
-                stack.append(neighbor)
+                next_cell = neighbor
+                break
+
+        if next_cell:
+            visited.add(next_cell)
+            robot_map.set_free(next_cell)
+            path.append(next_cell)
+
+            yield next_cell, visited.copy(), robot_map
+        else:
+            # BACKTRACK – cofanie się
+            path.pop()
+
+            if path:
+                yield path[-1], visited.copy(), robot_map

@@ -33,7 +33,6 @@ def choose_algorithm():
     else:
         raise ValueError("Nieprawidłowy wybór algorytmu")
 
-
 def main():
     grid = [
         [0,0,0,1,0,0,0,0,1,0, 0,0,0,1,0,0,0,0,0,0],

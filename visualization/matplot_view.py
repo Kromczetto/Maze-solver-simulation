@@ -2,11 +2,11 @@ import matplotlib.pyplot as plt
 import matplotlib.animation as animation
 from maze.robot_map import CellState
 
-
 def animate_exploration(maze, steps, start, goal):
-    plt.ion() 
+    fig, ax = plt.subplots(figsize=(8, 6))
 
-    fig, ax = plt.subplots()
+    fig.subplots_adjust(right=0.75)
+
     ax.set_aspect("equal")
 
     for r in range(maze.height):
@@ -43,28 +43,29 @@ def animate_exploration(maze, steps, start, goal):
     )
 
     robot_patch = None
-    memory_patches = {}
+    known_cells = {}
+
+    info_text = fig.text(
+        0.78, 0.85, "",
+        ha="left",
+        va="top",
+        fontsize=11
+    )
 
     def update(i):
         nonlocal robot_patch
-        cell, visited, robot_map = steps[i]
+        step = steps[i]
 
-        for r in range(robot_map.height):
-            for c in range(robot_map.width):
-                state = robot_map.map[r][c]
+        for r in range(step.robot_map.height):
+            for c in range(step.robot_map.width):
+                state = step.robot_map.map[r][c]
                 if state == CellState.UNKNOWN:
                     continue
-
-                key = (r, c)
-                if key in memory_patches:
+                if (r, c) in known_cells:
                     continue
 
-                if state == CellState.WALL:
-                    color = "black"
-                    alpha = 1.0
-                else:
-                    color = "lightblue"
-                    alpha = 0.4
+                color = "black" if state == CellState.WALL else "lightblue"
+                alpha = 1.0 if state == CellState.WALL else 0.4
 
                 rect = plt.Rectangle(
                     (c, maze.height - r - 1),
@@ -73,25 +74,27 @@ def animate_exploration(maze, steps, start, goal):
                     alpha=alpha
                 )
                 ax.add_patch(rect)
-                memory_patches[key] = rect
+                known_cells[(r, c)] = rect
 
         if robot_patch:
             robot_patch.remove()
 
         robot_patch = plt.Rectangle(
-            (cell.col, maze.height - cell.row - 1),
+            (step.cell.col, maze.height - step.cell.row - 1),
             1, 1,
             color="yellow",
             alpha=0.7
         )
         ax.add_patch(robot_patch)
 
-        return []  
+        info_text.set_text(
+            "STATYSTYKI SYMULACJI\n"
+            "------------------\n"
+            f"Krok: {step.step_index}\n"
+            f"Czas: {step.time_sec:.2f} s\n"
+        )
 
-    ax.set_xlim(0, maze.width)
-    ax.set_ylim(0, maze.height)
-    ax.set_xticks([])
-    ax.set_yticks([])
+        return []
 
     anim = animation.FuncAnimation(
         fig,
@@ -101,6 +104,11 @@ def animate_exploration(maze, steps, start, goal):
         repeat=False
     )
 
-    fig._animation = anim
+    fig._anim = anim  
+
+    ax.set_xlim(0, maze.width)
+    ax.set_ylim(0, maze.height)
+    ax.set_xticks([])
+    ax.set_yticks([])
 
     plt.show(block=False)

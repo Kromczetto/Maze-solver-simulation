@@ -2,16 +2,7 @@ from maze.maze import Maze
 from maze.cell import Cell
 from visualization.matplot_view import animate_exploration
 from algorithms import ALGORITHMS
-
-def run(explorer, max_steps=20000):
-    steps = []
-    for _ in range(max_steps):
-        try:
-            steps.append(next(explorer))
-        except StopIteration:
-            break
-    return steps
-
+from simulation.simulator import simulate
 
 def choose_algorithm():
     print("Wybierz algorytm eksploracji:")
@@ -23,7 +14,7 @@ def choose_algorithm():
     choice = input("Podaj numer (1–4): ").strip()
 
     if choice == "1":
-        return ALGORITHMS["wall"]
+        return ALGORITHMS["wall_follower"]
     elif choice == "2":
         return ALGORITHMS["dfs"]
     elif choice == "3":
@@ -35,29 +26,6 @@ def choose_algorithm():
 
 def main():
     grid = [
-        [0,0,0,1,0,0,0,0,1,0, 0,0,0,1,0,0,0,0,0,0],
-        [0,1,0,1,0,1,1,0,1,0, 1,1,0,1,0,1,1,1,1,0],
-        [0,1,0,0,0,0,1,0,0,0, 0,1,0,0,0,0,0,0,1,0],
-        [0,1,1,1,1,0,1,1,1,0, 0,1,1,1,1,1,1,0,1,0],
-        [0,0,0,0,1,0,0,0,1,0, 0,0,0,0,0,0,1,0,0,0],
-        [1,1,1,0,1,1,1,0,1,1, 1,1,1,1,1,0,1,1,1,0],
-        [0,0,1,0,0,0,1,0,0,0, 0,0,0,0,1,0,0,0,1,0],
-        [0,1,1,1,1,0,1,1,1,1, 1,1,1,0,1,1,1,0,1,0],
-        [0,0,0,0,1,0,0,0,0,0, 0,0,1,0,0,0,0,0,1,0],
-        [1,1,1,0,1,1,1,1,1,1, 1,0,1,1,1,1,1,0,1,0],
-        [0,0,0,0,0,0,0,0,0,0, 1,0,0,0,0,0,1,0,0,0],
-        [0,1,1,1,1,1,1,1,1,0, 1,1,1,1,1,0,1,1,1,0],
-        [0,0,0,0,0,0,0,0,1,0, 0,0,0,0,1,0,0,0,0,0],
-        [0,1,1,1,1,1,1,0,1,1, 1,1,1,0,1,1,1,1,1,0],
-        [0,0,0,0,0,0,1,0,0,0, 0,0,1,0,0,0,0,0,0,0],
-        [1,1,1,1,1,0,1,1,1,1, 1,0,1,1,1,1,1,1,1,0],
-        [0,0,0,0,1,0,0,0,0,0, 1,0,0,0,0,0,0,0,1,0],
-        [0,1,1,0,1,1,1,1,1,0, 1,1,1,1,1,1,1,0,1,0],
-        [0,0,1,0,0,0,0,0,1,0, 0,0,0,0,0,0,1,0,0,0],
-        [0,0,0,0,1,1,1,0,0,0, 1,1,1,1,1,0,0,0,1,0],
-    ]
-
-    grid2 = [
         [0,0,0,0,0],
         [1,1,1,1,0],
         [0,0,0,1,0],
@@ -68,14 +36,17 @@ def main():
 
     maze = Maze(grid)
     start = Cell(0, 0)
-    goal  = Cell(18, 17)
+    goal = Cell(5, 4)
 
     algorithm = choose_algorithm()
     explorer = algorithm(maze, start, goal)
 
-    steps = run(explorer)
-    animate_exploration(maze, steps, start, goal)
+    steps = simulate(explorer, speed=1.0)
 
+    print(f"Liczba kroków: {steps[-1].step_index}")
+    print(f"Czas przejazdu: {steps[-1].time_sec:.2f} s")
+
+    animate_exploration(maze, steps, start, goal)
 
 if __name__ == "__main__":
     main()

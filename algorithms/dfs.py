@@ -16,7 +16,6 @@ def dfs(maze, start, goal):
         if current == goal:
             return
 
-        # znajdź nieodwiedzonego sąsiada
         next_cell = None
         for neighbor in maze.get_neighbors(current):
             if neighbor not in visited:
@@ -30,7 +29,6 @@ def dfs(maze, start, goal):
 
             yield next_cell, visited.copy(), robot_map
         else:
-            # BACKTRACK – cofanie się
             path.pop()
 
             if path:

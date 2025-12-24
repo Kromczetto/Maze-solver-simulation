@@ -1,7 +1,8 @@
 import sys
 from PyQt5.QtWidgets import (
-    QApplication, QWidget, QVBoxLayout,
-    QRadioButton, QPushButton, QTabWidget
+    QApplication, QWidget, QVBoxLayout, QLabel,
+    QRadioButton, QPushButton, QTabWidget,
+    QMessageBox, QFrame
 )
 
 from maze.maze import Maze
@@ -42,9 +43,10 @@ class MazeExplorerGUI(QWidget):
     def __init__(self):
         super().__init__()
         self.setWindowTitle("Maze Explorer")
-        self.setFixedSize(480, 520)
+        self.setFixedSize(500, 560)
 
         self.selected_algorithm = "wall_follower"
+
         self.custom_grid = None
         self.custom_start = None
         self.custom_goal = None
@@ -81,25 +83,49 @@ class MazeExplorerGUI(QWidget):
 
         editor_tab = QWidget()
         editor_layout = QVBoxLayout()
+
         self.editor = MazeEditorWidget(rows=20, cols=20, cell_size=20)
         editor_layout.addWidget(self.editor)
+
+        save_btn = QPushButton("Zapisz labirynt")
+        save_btn.clicked.connect(self.save_drawn_maze)
+        editor_layout.addWidget(save_btn)
+
+        info = QLabel(
+            "LPM: ściana | PPM: usuń\n"
+            "SHIFT + LPM: START | CTRL + LPM: GOAL"
+        )
+        editor_layout.addWidget(info)
+
         editor_tab.setLayout(editor_layout)
         tabs.addTab(editor_tab, "Edytor labiryntu")
 
         layout.addWidget(tabs)
         self.setLayout(layout)
 
+    def save_drawn_maze(self):
+        self.custom_grid = [row[:] for row in self.editor.grid]
+        self.custom_start = self.editor.start
+        self.custom_goal = self.editor.goal
+
+        QMessageBox.information(
+            self,
+            "Zapisano",
+            "Labirynt zapisany.\n"
+            "Zostanie użyty przy kolejnym uruchomieniu."
+        )
+
     def run_maze(self):
         algorithm = ALGORITHMS[self.selected_algorithm]
 
-        if self.custom_grid is None:
-            grid = DEFAULT_GRID
-            sr, sc = DEFAULT_START
-            gr, gc = DEFAULT_GOAL
-        else:
+        if self.custom_grid is not None:
             grid = self.custom_grid
             sr, sc = self.custom_start
             gr, gc = self.custom_goal
+        else:
+            grid = DEFAULT_GRID
+            sr, sc = DEFAULT_START
+            gr, gc = DEFAULT_GOAL
 
         maze = Maze(grid)
         start = Cell(sr, sc)

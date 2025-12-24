@@ -12,7 +12,7 @@ from visualization.matplot_view import animate_exploration
 from simulation.simulator import simulate
 from gui.maze_editor import MazeEditorWidget
 from maze.generator import generate_maze_prim
-
+from gui.test_tab import TestTab
 
 DEFAULT_GRID = [
     [0,0,0,1,0,0,0,0,1,0,0,0,0,1,0,0,0,0,0,0],
@@ -58,7 +58,6 @@ class MazeExplorerGUI(QWidget):
         layout = QVBoxLayout()
         tabs = QTabWidget()
 
-        # ---------- ALGORYTMY ----------
         algo_tab = QWidget()
         algo_layout = QVBoxLayout()
 
@@ -83,7 +82,6 @@ class MazeExplorerGUI(QWidget):
         algo_tab.setLayout(algo_layout)
         tabs.addTab(algo_tab, "Algorytmy")
 
-        # ---------- EDYTOR ----------
         editor_tab = QWidget()
         editor_layout = QVBoxLayout()
 
@@ -108,14 +106,15 @@ class MazeExplorerGUI(QWidget):
         layout.addWidget(tabs)
         self.setLayout(layout)
 
-    # ---------- GENERATOR ----------
+        tabs.addTab(TestTab(), "Testy algorytmów")
+
+
     def generate_maze(self):
         grid = generate_maze_prim(19, 19)
         self.editor.set_grid(grid)
         self.editor.start = (1, 1)
         self.editor.goal = (17, 17)
 
-    # ---------- ZAPIS ----------
     def save_drawn_maze(self):
         self.custom_grid = [row[:] for row in self.editor.grid]
         self.custom_start = self.editor.start
@@ -127,7 +126,6 @@ class MazeExplorerGUI(QWidget):
             "Labirynt zapisany."
         )
 
-    # ---------- RUN ----------
     def run_maze(self):
         if self.custom_grid:
             grid = self.custom_grid

@@ -2,7 +2,6 @@ from enum import Enum
 from maze.cell import Cell
 from maze.robot_map import RobotMap
 
-
 class Direction(Enum):
     NORTH = 0
     EAST = 1

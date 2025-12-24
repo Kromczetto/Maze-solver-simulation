@@ -1,19 +1,27 @@
 from PyQt5.QtWidgets import QWidget
 from PyQt5.QtGui import QPainter, QColor, QPen
-from PyQt5.QtCore import Qt, QPoint
+from PyQt5.QtCore import Qt
 
 class MazeEditorWidget(QWidget):
     def __init__(self, rows=20, cols=20, cell_size=20):
         super().__init__()
-        self.rows = rows
-        self.cols = cols
         self.cell_size = cell_size
 
-        self.grid = [[0 for _ in range(cols)] for _ in range(rows)]
-        self.start = (0, 0)
-        self.goal = (rows - 1, cols - 1)
+        self.set_grid([[0 for _ in range(cols)] for _ in range(rows)])
 
-        self.setFixedSize(cols * cell_size, rows * cell_size)
+        self.start = (1, 1)
+        self.goal = (rows - 2, cols - 2)
+
+    def set_grid(self, grid):
+        self.grid = grid
+        self.rows = len(grid)
+        self.cols = len(grid[0])
+
+        self.setFixedSize(
+            self.cols * self.cell_size,
+            self.rows * self.cell_size
+        )
+        self.update()
 
     def paintEvent(self, event):
         painter = QPainter(self)
@@ -37,7 +45,7 @@ class MazeEditorWidget(QWidget):
             sr * self.cell_size,
             self.cell_size,
             self.cell_size,
-            QColor(0, 255, 0, 150),
+            QColor(0, 255, 0, 150)
         )
 
         gr, gc = self.goal
@@ -46,7 +54,7 @@ class MazeEditorWidget(QWidget):
             gr * self.cell_size,
             self.cell_size,
             self.cell_size,
-            QColor(255, 0, 0, 150),
+            QColor(255, 0, 0, 150)
         )
 
     def mousePressEvent(self, event):

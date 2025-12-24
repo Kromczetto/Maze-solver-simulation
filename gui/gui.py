@@ -2,7 +2,7 @@ import sys
 from PyQt5.QtWidgets import (
     QApplication, QWidget, QVBoxLayout, QLabel,
     QRadioButton, QPushButton, QTabWidget,
-    QMessageBox, QFrame
+    QMessageBox
 )
 
 from maze.maze import Maze
@@ -11,42 +11,15 @@ from algorithms import ALGORITHMS
 from visualization.matplot_view import animate_exploration
 from simulation.simulator import simulate
 from gui.maze_editor import MazeEditorWidget
-
-DEFAULT_GRID = [
-    [0,0,0,1,0,0,0,0,1,0,0,0,0,1,0,0,0,0,0,0],
-    [0,1,0,1,0,1,1,0,1,0,1,1,0,1,0,1,1,1,1,0],
-    [0,1,0,0,0,0,1,0,0,0,0,1,0,0,0,0,0,0,1,0],
-    [0,1,1,1,1,0,1,1,1,0,0,1,1,1,1,1,1,0,1,0],
-    [0,0,0,0,1,0,0,0,1,0,0,0,0,0,0,0,1,0,0,0],
-    [1,1,1,0,1,1,1,0,1,1,1,1,1,1,1,0,1,1,1,0],
-    [0,0,1,0,0,0,1,0,0,0,0,0,0,0,1,0,0,0,1,0],
-    [0,1,1,1,1,0,1,1,1,1,1,1,1,0,1,1,1,0,1,0],
-    [0,0,0,0,1,0,0,0,0,0,0,0,1,0,0,0,0,0,1,0],
-    [1,1,1,0,1,1,1,1,1,1,1,0,1,1,1,1,1,0,1,0],
-    [0,0,0,0,0,0,0,0,0,0,1,0,0,0,0,0,1,0,0,0],
-    [0,1,1,1,1,1,1,1,1,0,1,1,1,1,1,0,1,1,1,0],
-    [0,0,0,0,0,0,0,0,1,0,0,0,0,0,1,0,0,0,0,0],
-    [0,1,1,1,1,1,1,0,1,1,1,1,1,0,1,1,1,1,1,0],
-    [0,0,0,0,0,0,1,0,0,0,0,0,1,0,0,0,0,0,0,0],
-    [1,1,1,1,1,0,1,1,1,1,1,0,1,1,1,1,1,1,1,0],
-    [0,0,0,0,1,0,0,0,0,0,1,0,0,0,0,0,0,0,1,0],
-    [0,1,1,0,1,1,1,1,1,0,1,1,1,1,1,1,1,0,1,0],
-    [0,0,1,0,0,0,0,0,1,0,0,0,0,0,0,0,1,0,0,0],
-    [0,0,0,0,1,1,1,0,0,0,1,1,1,1,1,0,0,0,1,0],
-]
-
-DEFAULT_START = (0, 0)
-DEFAULT_GOAL = (18, 17)
-
+from maze.generator import generate_maze_prim
 
 class MazeExplorerGUI(QWidget):
     def __init__(self):
         super().__init__()
         self.setWindowTitle("Maze Explorer")
-        self.setFixedSize(500, 560)
+        self.setFixedSize(540, 620)
 
         self.selected_algorithm = "wall_follower"
-
         self.custom_grid = None
         self.custom_start = None
         self.custom_goal = None
@@ -74,7 +47,7 @@ class MazeExplorerGUI(QWidget):
             if key == "wall_follower":
                 rb.setChecked(True)
 
-        run_btn = QPushButton("Uruchom")
+        run_btn = QPushButton("Uruchom algorytm")
         run_btn.clicked.connect(self.run_maze)
         algo_layout.addWidget(run_btn)
 
@@ -86,6 +59,10 @@ class MazeExplorerGUI(QWidget):
 
         self.editor = MazeEditorWidget(rows=20, cols=20, cell_size=20)
         editor_layout.addWidget(self.editor)
+
+        gen_btn = QPushButton("Generuj labirynt (Prim)")
+        gen_btn.clicked.connect(self.generate_prim_maze)
+        editor_layout.addWidget(gen_btn)
 
         save_btn = QPushButton("Zapisz labirynt")
         save_btn.clicked.connect(self.save_drawn_maze)
@@ -103,6 +80,21 @@ class MazeExplorerGUI(QWidget):
         layout.addWidget(tabs)
         self.setLayout(layout)
 
+    def generate_prim_maze(self):
+        rows = self.editor.rows
+        cols = self.editor.cols
+
+        if rows % 2 == 0:
+            rows -= 1
+        if cols % 2 == 0:
+            cols -= 1
+
+        grid = generate_maze_prim(rows, cols)
+
+        self.editor.set_grid(grid)
+        self.editor.start = (1, 1)
+        self.editor.goal = (rows - 2, cols - 2)
+
     def save_drawn_maze(self):
         self.custom_grid = [row[:] for row in self.editor.grid]
         self.custom_start = self.editor.start
@@ -118,14 +110,14 @@ class MazeExplorerGUI(QWidget):
     def run_maze(self):
         algorithm = ALGORITHMS[self.selected_algorithm]
 
-        if self.custom_grid is not None:
+        if self.custom_grid:
             grid = self.custom_grid
             sr, sc = self.custom_start
             gr, gc = self.custom_goal
         else:
-            grid = DEFAULT_GRID
-            sr, sc = DEFAULT_START
-            gr, gc = DEFAULT_GOAL
+            grid = self.editor.grid
+            sr, sc = self.editor.start
+            gr, gc = self.editor.goal
 
         maze = Maze(grid)
         start = Cell(sr, sc)
@@ -135,7 +127,6 @@ class MazeExplorerGUI(QWidget):
         steps = simulate(explorer)
 
         animate_exploration(maze, steps, start, goal)
-
 
 if __name__ == "__main__":
     app = QApplication(sys.argv)

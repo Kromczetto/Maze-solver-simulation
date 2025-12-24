@@ -4,6 +4,8 @@ from maze.robot_map import CellState
 
 
 def animate_exploration(maze, steps, start, goal):
+    plt.ion() 
+
     fig, ax = plt.subplots()
     ax.set_aspect("equal")
 
@@ -84,7 +86,7 @@ def animate_exploration(maze, steps, start, goal):
         )
         ax.add_patch(robot_patch)
 
-        return []
+        return []  
 
     ax.set_xlim(0, maze.width)
     ax.set_ylim(0, maze.height)
@@ -99,4 +101,6 @@ def animate_exploration(maze, steps, start, goal):
         repeat=False
     )
 
-    plt.show()
+    fig._animation = anim
+
+    plt.show(block=False)

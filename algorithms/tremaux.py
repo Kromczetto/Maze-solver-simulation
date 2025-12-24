@@ -11,58 +11,66 @@ DIRECTIONS = [
 def edge(a, b):
     return frozenset((a, b))
 
+def manhattan(a, b):
+    return abs(a.row - b.row) + abs(a.col - b.col)
+
 
 def tremaux(maze, start, goal):
     robot_map = RobotMap(maze.height, maze.width)
 
-    stack = [start]
-    visited_cells = {start}
-    edge_marks = {} 
+    current = start
+    edge_marks = {}
+    came_from = {}   
 
-    robot_map.set_free(start)
-    yield start, visited_cells.copy(), robot_map
+    robot_map.set_free(current)
+    yield current, set(), robot_map
 
-    while stack:
-        current = stack[-1]
-
+    while True:
         if current == goal:
             return
 
-        neighbors_free = []
+        neighbors = []
 
         for dr, dc in DIRECTIONS:
             nr, nc = current.row + dr, current.col + dc
-            neighbor = Cell(nr, nc)
-
             if not maze.in_bounds(nr, nc):
                 continue
 
+            neighbor = Cell(nr, nc)
             if maze.is_wall(nr, nc):
                 robot_map.set_wall(neighbor)
-            else:
-                robot_map.set_free(neighbor)
-                neighbors_free.append(neighbor)
+                continue
 
-        next_cell = None
-        for n in neighbors_free:
-            e = edge(current, n)
-            if edge_marks.get(e, 0) == 0:
-                next_cell = n
-                break
+            robot_map.set_free(neighbor)
+            e = edge(current, neighbor)
+            mark = edge_marks.get(e, 0)
 
-        if next_cell:
-            e = edge(current, next_cell)
+            neighbors.append((neighbor, e, mark, manhattan(neighbor, goal)))
+
+        candidates = [
+            (n, e, d) for (n, e, m, d) in neighbors if m == 0
+        ]
+
+        if candidates:
+            candidates.sort(key=lambda x: x[2])
+            next_cell, e, _ = candidates[0]
+
             edge_marks[e] = 1
+            came_from[next_cell] = e
+            current = next_cell
+            yield current, set(), robot_map
+            continue
 
-            visited_cells.add(next_cell)
-            stack.append(next_cell)
-            yield next_cell, visited_cells.copy(), robot_map
-        else:
-            stack.pop()
-            if not stack:
-                return
+        if current not in came_from:
+            return  
 
-            back = stack[-1]
-            e = edge(current, back)
-            edge_marks[e] = 2
-            yield back, visited_cells.copy(), robot_map
+        e = came_from[current]
+        edge_marks[e] = 2
+        a, b = tuple(e)
+        next_cell = a if current == b else b
+
+        if next_cell == current:
+            return
+
+        current = next_cell
+        yield current, set(), robot_map

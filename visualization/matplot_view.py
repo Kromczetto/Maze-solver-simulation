@@ -4,22 +4,29 @@ from maze.robot_map import CellState
 
 def animate_exploration(maze, steps, start, goal):
     fig, ax = plt.subplots(figsize=(8, 6))
-
     fig.subplots_adjust(right=0.75)
 
     ax.set_aspect("equal")
 
     for r in range(maze.height):
         for c in range(maze.width):
-            ax.add_patch(
-                plt.Rectangle(
-                    (c, maze.height - r - 1),
-                    1, 1,
-                    edgecolor="gray",
-                    fill=False
+            if maze.grid[r][c] == 1:
+                ax.add_patch(
+                    plt.Rectangle(
+                        (c, maze.height - r - 1),
+                        1, 1,
+                        color="black"
+                    )
                 )
-            )
-
+            else:
+                ax.add_patch(
+                    plt.Rectangle(
+                        (c, maze.height - r - 1),
+                        1, 1,
+                        edgecolor="gray",
+                        fill=False
+                    )
+                )
     ax.text(
         start.col + 0.5,
         maze.height - start.row - 0.5,
@@ -43,7 +50,7 @@ def animate_exploration(maze, steps, start, goal):
     )
 
     robot_patch = None
-    known_cells = {}
+    known_free = set()
 
     info_text = fig.text(
         0.78, 0.85, "",
@@ -58,23 +65,20 @@ def animate_exploration(maze, steps, start, goal):
 
         for r in range(step.robot_map.height):
             for c in range(step.robot_map.width):
-                state = step.robot_map.map[r][c]
-                if state == CellState.UNKNOWN:
+                if step.robot_map.map[r][c] != CellState.FREE:
                     continue
-                if (r, c) in known_cells:
+                if (r, c) in known_free:
                     continue
 
-                color = "black" if state == CellState.WALL else "lightblue"
-                alpha = 1.0 if state == CellState.WALL else 0.4
-
-                rect = plt.Rectangle(
-                    (c, maze.height - r - 1),
-                    1, 1,
-                    color=color,
-                    alpha=alpha
+                ax.add_patch(
+                    plt.Rectangle(
+                        (c, maze.height - r - 1),
+                        1, 1,
+                        color="lightblue",
+                        alpha=0.4
+                    )
                 )
-                ax.add_patch(rect)
-                known_cells[(r, c)] = rect
+                known_free.add((r, c))
 
         if robot_patch:
             robot_patch.remove()
@@ -83,7 +87,7 @@ def animate_exploration(maze, steps, start, goal):
             (step.cell.col, maze.height - step.cell.row - 1),
             1, 1,
             color="yellow",
-            alpha=0.7
+            alpha=0.8
         )
         ax.add_patch(robot_patch)
 
@@ -104,7 +108,7 @@ def animate_exploration(maze, steps, start, goal):
         repeat=False
     )
 
-    fig._anim = anim  
+    fig._anim = anim
 
     ax.set_xlim(0, maze.width)
     ax.set_ylim(0, maze.height)

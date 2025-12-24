@@ -15,6 +15,8 @@ class Direction(Enum):
     def right(self):
         return Direction((self.value + 1) % 4)
 
+    def back(self):
+        return Direction((self.value + 2) % 4)
 
 DIR_MOVE = {
     Direction.NORTH: (-1, 0),
@@ -23,70 +25,64 @@ DIR_MOVE = {
     Direction.WEST: (0, -1),
 }
 
-
 def manhattan(a, b):
     return abs(a.row - b.row) + abs(a.col - b.col)
-
-
-def can_move(maze, cell, direction):
-    dr, dc = DIR_MOVE[direction]
-    nr, nc = cell.row + dr, cell.col + dc
-    return maze.in_bounds(nr, nc) and not maze.is_wall(nr, nc)
-
-
-def move(cell, direction):
-    dr, dc = DIR_MOVE[direction]
-    return Cell(cell.row + dr, cell.col + dc)
-
 
 def maze_routing(maze, start, goal):
     robot_map = RobotMap(maze.height, maze.width)
 
     current = start
     heading = Direction.EAST
-    visited = {start}
 
-    md_best = manhattan(start, goal)
+    visited_states = set()        
+    move_stack = []               
 
     robot_map.set_free(start)
-    yield current, visited.copy(), robot_map
+    visited_states.add((current, heading))
+    yield current, set(c for c, _ in visited_states), robot_map
 
-    while current != goal:
-        moved = False
+    while True:
 
-        for d in Direction:
-            if can_move(maze, current, d):
-                next_cell = move(current, d)
-                if manhattan(next_cell, goal) < md_best:
-                    heading = d
-                    current = next_cell
-                    md_best = manhattan(current, goal)
-                    visited.add(current)
-                    robot_map.set_free(current)
-                    yield current, visited.copy(), robot_map
-                    moved = True
-                    break
+        if current == goal:
+            return
+        
+        free_dirs = []
 
-        if moved:
+        for d, (dr, dc) in DIR_MOVE.items():
+            nr, nc = current.row + dr, current.col + dc
+            neighbor = Cell(nr, nc)
+
+            if not maze.in_bounds(nr, nc):
+                continue
+
+            if maze.is_wall(nr, nc):
+                robot_map.set_wall(neighbor)
+            else:
+                robot_map.set_free(neighbor)
+                free_dirs.append((d, neighbor))
+
+        candidates = []
+
+        for d, cell in free_dirs:
+            state = (cell, d)
+            if state not in visited_states:
+                md = manhattan(cell, goal)
+                candidates.append((md, d, cell))
+
+        if candidates:
+            candidates.sort(key=lambda x: x[0])
+            _, d, cell = candidates[0]
+
+            move_stack.append((current, heading))
+            heading = d
+            current = cell
+            visited_states.add((current, heading))
+            yield current, set(c for c, _ in visited_states), robot_map
             continue
 
-        md_best = manhattan(current, goal)
+        if move_stack:
+            current, heading = move_stack.pop()
+            yield current, set(c for c, _ in visited_states), robot_map
+            continue
 
-        for d in (heading.left(), heading.right()):
-            if can_move(maze, current, d):
-                heading = d
-                current = move(current, heading)
-                visited.add(current)
-                robot_map.set_free(current)
-                yield current, visited.copy(), robot_map
-                break
-
-        while manhattan(current, goal) != md_best:
-            for d in (heading.right(), heading, heading.left()):
-                if can_move(maze, current, d):
-                    heading = d
-                    current = move(current, heading)
-                    visited.add(current)
-                    robot_map.set_free(current)
-                    yield current, visited.copy(), robot_map
-                    break
+        return

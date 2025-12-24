@@ -4,7 +4,7 @@ from maze.robot_map import CellState
 
 
 def animate_exploration(maze, steps, start, goal):
-    plt.ion()  # KLUCZOWE dla PyQt5
+    plt.ion() 
 
     fig, ax = plt.subplots()
     ax.set_aspect("equal")
@@ -86,7 +86,7 @@ def animate_exploration(maze, steps, start, goal):
         )
         ax.add_patch(robot_patch)
 
-        return []  # NIE ZWRACAMY artistów
+        return []  
 
     ax.set_xlim(0, maze.width)
     ax.set_ylim(0, maze.height)
@@ -101,8 +101,6 @@ def animate_exploration(maze, steps, start, goal):
         repeat=False
     )
 
-    # WAŻNE: zachowujemy referencję
     fig._animation = anim
 
-    # NIE BLOKUJEMY Qt
     plt.show(block=False)

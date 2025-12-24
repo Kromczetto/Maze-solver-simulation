@@ -20,7 +20,7 @@ def tremaux(maze, start, goal):
 
     current = start
     edge_marks = {}
-    came_from = {}   # Cell -> edge (do cofania)
+    came_from = {}   
 
     robot_map.set_free(current)
     yield current, set(), robot_map
@@ -31,7 +31,6 @@ def tremaux(maze, start, goal):
 
         neighbors = []
 
-        # zbierz sąsiadów
         for dr, dc in DIRECTIONS:
             nr, nc = current.row + dr, current.col + dc
             if not maze.in_bounds(nr, nc):
@@ -48,13 +47,11 @@ def tremaux(maze, start, goal):
 
             neighbors.append((neighbor, e, mark, manhattan(neighbor, goal)))
 
-        # 1️⃣ preferuj NIEODWIEDZONE krawędzie + Manhattan
         candidates = [
             (n, e, d) for (n, e, m, d) in neighbors if m == 0
         ]
 
         if candidates:
-            # deterministycznie: najbliżej celu
             candidates.sort(key=lambda x: x[2])
             next_cell, e, _ = candidates[0]
 
@@ -64,9 +61,8 @@ def tremaux(maze, start, goal):
             yield current, set(), robot_map
             continue
 
-        # 2️⃣ brak nowych → COFANIE
         if current not in came_from:
-            return  # nie ma skąd wracać → koniec
+            return  
 
         e = came_from[current]
         edge_marks[e] = 2

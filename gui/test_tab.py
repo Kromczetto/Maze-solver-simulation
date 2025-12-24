@@ -1,7 +1,8 @@
 import copy
+
 from PyQt5.QtWidgets import (
     QWidget, QVBoxLayout, QPushButton,
-    QTextEdit, QTableWidget, QTableWidgetItem,
+    QTableWidget, QTableWidgetItem,
     QFileDialog, QMessageBox
 )
 
@@ -13,6 +14,12 @@ from algorithms import ALGORITHMS
 from simulation.simulator import simulate
 from analysis.results import AlgorithmResult
 from analysis.plots import plot_results
+
+from openpyxl import Workbook
+
+
+def manhattan(a, b):
+    return abs(a.row - b.row) + abs(a.col - b.col)
 
 
 class TestTab(QWidget):
@@ -28,22 +35,31 @@ class TestTab(QWidget):
     def init_ui(self):
         layout = QVBoxLayout()
 
-        self.maze_view = QTextEdit()
-        self.maze_view.setReadOnly(True)
-        self.maze_view.setFontFamily("Courier")
-        layout.addWidget(self.maze_view)
-
         self.run_btn = QPushButton("Rozpocznij testy")
         self.run_btn.clicked.connect(self.run_tests)
         layout.addWidget(self.run_btn)
 
         self.table = QTableWidget(0, 3)
-        self.table.setHorizontalHeaderLabels(["Algorytm", "Kroki", "Czas [s]"])
+        self.table.setHorizontalHeaderLabels(
+            ["Algorytm", "Kroki", "Czas [s]"]
+        )
         layout.addWidget(self.table)
 
-        self.save_btn = QPushButton("Zapisz wyniki do pliku")
-        self.save_btn.clicked.connect(self.save_results)
-        layout.addWidget(self.save_btn)
+        self.save_txt_btn = QPushButton("Zapisz wyniki do TXT")
+        self.save_txt_btn.clicked.connect(self.save_results_txt)
+        layout.addWidget(self.save_txt_btn)
+
+        self.export_excel_btn = QPushButton("Eksportuj wyniki do Excela")
+        self.export_excel_btn.clicked.connect(self.export_results_excel)
+        layout.addWidget(self.export_excel_btn)
+
+        self.export_plot_excel_btn = QPushButton(
+            "Eksportuj dane wykresu do Excela"
+        )
+        self.export_plot_excel_btn.clicked.connect(
+            self.export_plot_data_excel
+        )
+        layout.addWidget(self.export_plot_excel_btn)
 
         self.plot_btn = QPushButton("Zobacz wykres")
         self.plot_btn.clicked.connect(self.show_plot)
@@ -55,9 +71,6 @@ class TestTab(QWidget):
         self.grid = generate_maze_prim(21, 21)
         self.start = (1, 1)
         self.goal = (19, 19)
-
-        maze_text = maze_to_text(self.grid, self.start, self.goal)
-        self.maze_view.setText(maze_text)
 
         self.results.clear()
         self.table.setRowCount(0)
@@ -89,7 +102,10 @@ class TestTab(QWidget):
 
         QMessageBox.information(self, "Gotowe", "Testy zakończone")
 
-    def save_results(self):
+    def save_results_txt(self):
+        if not self.results:
+            return
+
         path, _ = QFileDialog.getSaveFileName(
             self, "Zapisz wyniki", "", "Plik tekstowy (*.txt)"
         )
@@ -98,7 +114,7 @@ class TestTab(QWidget):
 
         with open(path, "w", encoding="utf-8") as f:
             f.write("LABIRYNT:\n")
-            f.write(self.maze_view.toPlainText())
+            f.write(maze_to_text(self.grid, self.start, self.goal))
             f.write("\n\nWYNIKI:\n")
 
             for r in self.results:
@@ -106,7 +122,64 @@ class TestTab(QWidget):
                     f"{r.name}: {r.steps} kroków, {r.time:.2f} s\n"
                 )
 
-        QMessageBox.information(self, "Zapisano", "Plik zapisany")
+        QMessageBox.information(self, "Zapisano", "Plik TXT zapisany")
+
+    def export_results_excel(self):
+        if not self.results:
+            return
+
+        path, _ = QFileDialog.getSaveFileName(
+            self, "Eksport do Excela", "", "Plik Excel (*.xlsx)"
+        )
+        if not path:
+            return
+
+        wb = Workbook()
+        ws = wb.active
+        ws.title = "Wyniki"
+
+        ws.append(["Algorytm", "Kroki", "Czas [s]"])
+
+        for r in self.results:
+            ws.append([r.name, r.steps, r.time])
+
+        wb.save(path)
+        QMessageBox.information(self, "Zapisano", "Excel z wynikami zapisany")
+
+    def export_plot_data_excel(self):
+        if not self.results:
+            return
+
+        path, _ = QFileDialog.getSaveFileName(
+            self, "Eksport danych wykresu", "", "Plik Excel (*.xlsx)"
+        )
+        if not path:
+            return
+
+        wb = Workbook()
+        goal_cell = Cell(*self.goal)
+
+        for result in self.results:
+            ws = wb.create_sheet(title=result.name[:31])
+            ws.append(
+                ["Krok", "Dystans Manhattan", "Row", "Col"]
+            )
+
+            for i, cell in enumerate(result.path):
+                ws.append([
+                    i,
+                    manhattan(cell, goal_cell),
+                    cell.row,
+                    cell.col
+                ])
+
+        if "Sheet" in wb.sheetnames:
+            del wb["Sheet"]
+
+        wb.save(path)
+        QMessageBox.information(
+            self, "Zapisano", "Dane wykresu zapisane do Excela"
+        )
 
     def show_plot(self):
         if not self.results:

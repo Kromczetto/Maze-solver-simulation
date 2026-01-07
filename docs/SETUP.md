@@ -28,6 +28,6 @@ Run the graphical interface:
 Clone the repository:
 
 ```bash
-git clone <repository-url>
+git clone https://github.com/Kromczetto/Maze-solver-simulation.git
 cd maze-explorer
 

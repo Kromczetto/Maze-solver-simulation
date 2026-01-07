@@ -1,65 +1,72 @@
-
----
-
-```md
 # User Guide
 
-This document explains how to use the Maze Explorer application
+This document describes how to use the **Maze Explorer** application
 from the perspective of an end user.
 
 ---
 
 ## Application Overview
 
-Maze Explorer allows users to:
-- explore mazes using different algorithms,
-- visualize exploration step by step,
-- compare algorithm performance,
-- design custom mazes,
-- export results for analysis.
+Maze Explorer enables users to:
+
+- Explore mazes using multiple exploration algorithms
+- Visualize the exploration process step by step
+- Compare algorithm performance and efficiency
+- Design and edit custom mazes
+- Export results for further analysis
 
 ---
 
 ## Selecting an Algorithm
 
-Available algorithms:
-- Wall Follower
-- Depth-First Search (DFS)
-- Trémaux Algorithm
-- Maze Routing (heuristic-based)
+The application provides several built-in maze exploration algorithms:
 
-Select the desired algorithm using the radio buttons.
+- **Wall Follower**
+- **Depth-First Search (DFS)**
+- **Trémaux Algorithm**
+- **Maze Routing (heuristic-based)**
+
+The desired algorithm can be selected using the radio buttons
+in the algorithm selection panel.
 
 ---
 
 ## Maze Editor
 
-- Left mouse button: place a wall
-- Right mouse button: remove a wall
-- Shift + Click: set start position
-- Ctrl + Click: set goal position
+The maze editor allows interactive creation and modification of maze layouts.
+The following controls are available:
+
+- **Left Mouse Button** – place a wall
+- **Right Mouse Button** – remove a wall
+- **Shift + Click** – set the start position
+- **Ctrl + Click** – set the goal position
 
 ---
 
 ## Running a Simulation
 
-Click **Run** to start maze exploration.
-The exploration will be animated cell by cell.
+To start maze exploration, click the **Run** button.
+The algorithm will explore the maze incrementally, and the progress
+will be animated cell by cell in the visualization panel.
 
 ---
 
 ## Test Mode
 
-The **Tests** tab allows:
-- automatic execution of all algorithms,
-- comparison of step count and execution time,
-- export of results to TXT and Excel,
-- visualization of distance-to-goal plots.
+The **Tests** tab provides tools for automated evaluation:
+
+- Automatic execution of all available algorithms
+- Comparison of step count and execution time
+- Export of results to **TXT** and **Excel** formats
+- Visualization of distance-to-goal metrics over time
 
 ---
 
 ## Exporting Results
 
-- TXT: saves maze layout and numeric results
-- Excel: saves performance metrics
-- Plot data: exports Manhattan distance over time
+Simulation results can be exported in the following formats:
+
+- **TXT** – saves the maze layout and numeric results
+- **Excel** – stores performance metrics in tabular form
+- **Plot Data** – exports Manhattan distance values over time
+

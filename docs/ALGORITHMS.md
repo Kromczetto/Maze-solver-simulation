@@ -239,12 +239,12 @@ It combines:
 
 ## Algorithm Comparison Summary
 
-| Algorithm       | Complete | Optimal | Memory Usage | Heuristic |
-|-----------------|----------|---------|--------------|-----------|
-| DFS             | Yes      | No      | Low          | No        |
-| Trémaux         | Yes      | No      | Moderate     | Partial   |
-| Wall Follower   | No*      | No      | Very Low     | No        |
-| Maze Routing    | Yes      | No      | Moderate     | Yes       |
+| Algorithm       | Complete | Memory Usage | Heuristic |
+|-----------------|----------|--------------|-----------|
+| DFS             | Yes      | Low          | No        |
+| Trémaux         | Yes      | Moderate     | Partial   |
+| Wall Follower   | No*      | Very Low     | No        |
+| Maze Routing    | Yes      | Moderate     | Yes       |
 
 \* Wall Follower completeness depends on maze topology.
 

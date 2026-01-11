@@ -187,7 +187,6 @@ To avoid infinite loops:
 ### Properties
 
 - **Completeness:** Only for specific maze types
-- **Optimality:** No
 - **Memory Usage:** Very low
 - **Behavior:** Deterministic, wall-oriented movement
 
